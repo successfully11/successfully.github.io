@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Belajar Firebase CRUD</title>
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-app-compat.js"></script>
+    <!-- Firebase Realtime Database -->
+    <script src="https://www.gstatic.com/firebasejs/10.1.0/firebase-database-compat.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Belajar Firebase CRUD</h1>
+      <div class="form">
+        <input type="text" placeholder="Nama" data-input="nama" />
+        <input type="text" placeholder="Pesan" data-input="pesan" />
+        <button data-button="kirim">Kirim</button>
+      </div>
+      <div class="data-list">
+        <h2>Data yang Telah Dikirim:</h2>
+        <ul data-list="messages"></ul>
+      </div>
+    </div>
+
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyCWb1Iekb9kDNYOjaOIj2xjMjtIaxw20Yo",
+        authDomain: "latihan-bb475.firebaseapp.com",
+        databaseURL: "https://latihan-bb475-default-rtdb.firebaseio.com",
+        projectId: "latihan-bb475",
+        storageBucket: "latihan-bb475.appspot.com",
+        messagingSenderId: "815188069372",
+        appId: "1:815188069372:web:7bd144c3f65ca253a44079",
+      };
+
+      const app = firebase.initializeApp(firebaseConfig);
+      const database = firebase.database();
+
+      const namaInput = document.querySelector('[data-input="nama"]');
+      const pesanInput = document.querySelector('[data-input="pesan"]');
+      const kirimButton = document.querySelector('[data-button="kirim"]');
+      const dataList = document.querySelector('[data-list="messages"]');
+
+      kirimButton.onclick = () => {
+        const nama = namaInput.value;
+        const pesan = pesanInput.value;
+
+        if (nama && pesan) {
+          const dataToCreate = {
+            nama: nama,
+            pesan: pesan,
+          };
+
+          // Menambahkan data ke path '/messages'
+          const newMessageRef = database.ref("/messages").push();
+          newMessageRef
+            .set(dataToCreate)
+            .then(() => {
+              console.log("Data berhasil ditambahkan");
+              namaInput.value = ""; // Mengosongkan input setelah mengirim
+              pesanInput.value = "";
+            })
+            .catch((error) => {
+              console.error("Gagal menambahkan data: ", error);
+            });
+        } else {
+          console.log("Nama dan pesan harus diisi.");
+        }
+      };
+
+      // Membaca data dari Firebase saat halaman dimuat
+      database.ref("/messages").on("value", (snapshot) => {
+        dataList.innerHTML = ""; // Mengosongkan daftar data sebelum diisi ulang
+        snapshot.forEach((childSnapshot) => {
+          const data = childSnapshot.val();
+          const li = document.createElement("li");
+          li.textContent = `${data.nama}: ${data.pesan}`;
+          dataList.appendChild(li);
+        });
+      });
+    </script>
+  </body>
+</html>
